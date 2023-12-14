@@ -1,0 +1,25 @@
+taskkill /f /pid 4508
+
+docker-compose up -d
+
+docker build -t helmyyy/multi-client .
+docker build -t helmyyy/multi-server .
+
+docker run -it -p 3000:3000 helmyyy/multi-client
+docker run -it -p 8080:8080 helmyyy/multi-server
+
+docker push helmyyy/multi-client
+docker push helmyyy/multi-server
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/cloud/deploy.yaml
+kubectl apply -f k8s
+
+kubectl get pods
+kubectl get pv
+kubectl get service
+kubectl get all
+kubectl get all -n ingress-nginx
+
+kubectl delete -f k8s
+kubectl delete all --all 
+kubectl delete all --all -n ingress-nginx

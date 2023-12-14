@@ -1,0 +1,65 @@
+version: "1.0"
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    hostname: postgres-service
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: has
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    depends_on:
+      - postgres
+    ports:
+      - "4444:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
+      PGADMIN_DEFAULT_PASSWORD: admin
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    restart: unless-stopped
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nginx
+    hostname: nginx
+    ports:
+      - "5500:80"
+    depends_on:
+      - client
+      - api
+
+  api:
+    stdin_open: true
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: server
+    depends_on:
+      - postgres
+    restart: always
+
+  client:
+    stdin_open: true
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: client
+    depends_on:
+      - api
+    restart: always
+
+volumes:
+  postgres-data:
+  pgadmin-data:
